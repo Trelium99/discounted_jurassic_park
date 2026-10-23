@@ -55,6 +55,12 @@ export type activeDinoProfile = {
 }
 
 
+export type unappliedMaintenanceEvent = {
+    location: string
+    time: string
+    reason: string
+}
+
 export type maintenanceZone = {
     park_id: number;
     location: string;

@@ -1,4 +1,4 @@
-import type { activeDinoProfile, dinoAddedEvent, dinoRemovalEvent, maintenanceZone } from "../types/event_types";
+import type { activeDinoProfile, dinoAddedEvent, dinoRemovalEvent, maintenanceZone, unappliedMaintenanceEvent } from "../types/event_types";
 
 export async function getActivity() {
     const response = await fetch("https://dinoparks.herokuapp.com/nudls/feed");
@@ -19,8 +19,9 @@ export async function getActivity() {
 
     const dinoProfiles = buildDinoProfiles(data, activeDinosList);
     const maintenanceSchedule = buildMaintenanceSchedule(data, dinoProfiles);
+    const unappliedMaintenance = listUnappliedMaintenance(data);
 
-    return { dinoProfiles, maintenanceSchedule };
+    return { dinoProfiles, maintenanceSchedule, unappliedMaintenance };
 }
 
 function checkDinoActive(dinoEvent: dinoAddedEvent, activity: any){
@@ -94,8 +95,33 @@ function buildDinoProfiles(activityLogs: any[], activeDinosList: dinoAddedEvent[
     return activeDinoProfiles;
 }
 
-function isGridSquare(location: string) {
-    return /^[A-Z]([0-9]|1[0-6])$/.test(location);
+function isGridSquare(location: unknown) {
+    return typeof location === "string" && /^[A-Z]([0-9]|1[0-6])$/.test(location);
+}
+
+function listUnappliedMaintenance(activityLogs: any[]): unappliedMaintenanceEvent[] {
+    const skipped: unappliedMaintenanceEvent[] = []
+    for (const event of activityLogs) {
+        if (event.kind !== "maintenance_performed") {
+            continue
+        }
+        const reasons: string[] = []
+        if (!event.time) {
+            reasons.push("no time")
+        }
+        if (!isGridSquare(event.location)) {
+            reasons.push("location is not a grid square")
+        }
+        if (reasons.length === 0) {
+            continue
+        }
+        skipped.push({
+            location: event.location == null ? "" : String(event.location),
+            time: event.time == null ? "" : String(event.time),
+            reason: reasons.join("; "),
+        })
+    }
+    return skipped
 }
 
 function buildMaintenanceSchedule(activityLogs: any[], activeDinoProfiles: activeDinoProfile[]){

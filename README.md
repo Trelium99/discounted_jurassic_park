@@ -24,7 +24,7 @@ The app loads the NUDLS feed once, when the page opens:
 
 https://dinoparks.herokuapp.com/nudls/feed
 
-Digestion time and the 30-day maintenance clock are calculated from that load. The clock on screen keeps ticking, but zone safety does not. Reload the page to recompute against the current time.
+Digestion time and the 30-day maintenance clock are calculated from that load. The clock on screen keeps ticking, but zone safety does not. Use **Refresh feed** to load the feed again and recompute against the current time.
 
 ## What you see
 
@@ -76,7 +76,7 @@ Every zone needs maintenance every 30 days.
 - Days left are `30` minus the days since the latest `maintenance_performed` on that cell.
 - **Due** when there is no log, or when days left are 0 or less.
 - A cell with no log is treated as needing maintenance. It does **not** get a wrench. The note under Zone Info says this: only cells that have a maintenance log are drawn with a wrench. The other cells are assumed to need maintenance until a log arrives.
-- A maintenance event whose location is not a grid square, or which has no `time`, is not applied to a cell.
+- A maintenance event whose location is not a grid square, or which has no `time`, is not applied to a cell. Those events are listed in red, one card per log, in a column under the map key.
 
 ## Cell colours and icons
 
@@ -95,7 +95,7 @@ The map key under the grid lists the same four states.
 
 ## Check a zone against the feed
 
-1. Reload the app so the numbers match "now".
+1. Click **Refresh feed** so the numbers match "now".
 2. Click the cell, for example `V16`.
 3. Read Zone Info. Safety, Danger, Maintenance, Last log, and Dinosaurs are the claim.
 4. Open the feed and keep only the events that support that claim.
@@ -108,5 +108,5 @@ The map key under the grid lists the same four states.
 ## What the app does not do
 
 - Unknown `kind` values are skipped. They do not crash the page, and they are not listed anywhere. A reviewer will not see them in Zone Info.
-- The feed is not polled. State is whatever the endpoint returned at load.
+- The feed is not polled. **Refresh feed** loads it again. Until then, state is whatever the last load returned.
 - The header accident count is fixed at 8. It does not change when the feed changes.

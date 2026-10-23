@@ -1,5 +1,7 @@
 import { Box } from "@chakra-ui/react"
 import island from "../images/madeira_island-20000-sdb-5fc827-preview.png"
+import FeedAlert from "./feed_alert"
+import type { unappliedMaintenanceEvent } from "../types/event_types"
 
 const COLUMNS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const GLOW = "0 0 6px #5eb6ff, 0 0 18px rgba(94, 182, 255, 0.75)"
@@ -49,9 +51,10 @@ type MapGridProps = {
     cells?: Record<string, MapCell>
     selected?: string | null
     onSelect?: (location: string) => void
+    unapplied?: unappliedMaintenanceEvent[]
 }
 
-export default function MapGrid({ cells = {}, selected = null, onSelect }: MapGridProps) {
+export default function MapGrid({ cells = {}, selected = null, onSelect, unapplied = [] }: MapGridProps) {
     const squares = []
     for (let row = 0; row <= 16; row++) {
         for (const column of COLUMNS) {
@@ -179,6 +182,7 @@ export default function MapGrid({ cells = {}, selected = null, onSelect }: MapGr
                 </Box>
             ))}
         </Box>
+        <FeedAlert events={unapplied} />
         </Box>
     )
 }

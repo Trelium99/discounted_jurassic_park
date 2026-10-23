@@ -45,13 +45,35 @@ function buildMapCells(schedule: maintenanceZone[] = [], dinos: activeDinoProfil
 function App() {
   const [activity, setActivity] = useState<any>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  useEffect(() => {
+  const [toast, setToast] = useState<{ id: number; text: string } | null>(null);
+
+  function refreshActivity(fromClick = false) {
     getActivity().then((data) => {
       setActivity(data);
+      if (fromClick) {
+        setToast({ id: Date.now(), text: "Feed refreshed" });
+      }
+    }).catch(() => {
+      if (fromClick) {
+        setToast({ id: Date.now(), text: "Could not refresh the feed" });
+      }
     });
+  }
+
+  useEffect(() => {
+    refreshActivity();
   }, []);
 
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+    const timeout = window.setTimeout(() => setToast(null), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
   console.log(activity);
+  const feedRefreshed = toast?.text === "Feed refreshed"
   return (
     <>
       <Box position="relative" minH="100vh" w="100vw" bg="#0a122e" display={"flex"} flexDirection="column" alignItems="center" justifyContent="top">
@@ -81,6 +103,22 @@ function App() {
           >
             <WallClock />
             <AccidentCounter />
+            <Box
+              as="button"
+              onClick={() => refreshActivity(true)}
+              px="1rem"
+              py="0.4rem"
+              border="1px solid"
+              borderColor="#7ecbff"
+              borderRadius="md"
+              color="#7ecbff"
+              bg="#0a122e"
+              cursor="pointer"
+              fontFamily="Share Tech Mono, ui-monospace, Consolas, monospace"
+              boxShadow="0 0 6px #5eb6ff, 0 0 18px rgba(94, 182, 255, 0.75)"
+            >
+              Refresh feed
+            </Box>
           </GridItem>
           <GridItem area="sidebar"><DinoList dinos={activity?.dinoProfiles || []} /></GridItem>
           <GridItem area="sidebar2" position="relative" zIndex="1">
@@ -95,6 +133,7 @@ function App() {
               selected={selectedLocation}
               onSelect={setSelectedLocation}
               cells={buildMapCells(activity?.maintenanceSchedule, activity?.dinoProfiles)}
+              unapplied={activity?.unappliedMaintenance ?? []}
             />
           </GridItem>
         </Grid>
@@ -113,6 +152,42 @@ function App() {
             marginTop: "10rem",
           }}
         />
+        {toast && (
+          <Box
+            key={toast.id}
+            position="fixed"
+            top="1.25rem"
+            left="50%"
+            transform="translateX(-50%)"
+            zIndex={10}
+            display="flex"
+            alignItems="center"
+            gap="0.45rem"
+            bg="#0a122e"
+            border="1px solid"
+            borderColor={feedRefreshed ? "#39ff14" : "#7ecbff"}
+            borderRadius="md"
+            px="1rem"
+            py="0.55rem"
+            color={feedRefreshed ? "#39ff14" : "#7ecbff"}
+            fontFamily="Share Tech Mono, ui-monospace, Consolas, monospace"
+            boxShadow={feedRefreshed
+              ? "0 0 6px #39ff14, 0 0 18px rgba(57, 255, 20, 0.75)"
+              : "0 0 6px #5eb6ff, 0 0 18px rgba(94, 182, 255, 0.75)"}
+          >
+            {feedRefreshed && (
+              <Box as="span" display="inline-flex" w="1rem" h="1rem">
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.4">
+                  <path d="M13.2 8A5.2 5.2 0 0 1 4.4 11.6" />
+                  <path d="M2.8 8A5.2 5.2 0 0 1 11.6 4.4" />
+                  <path d="M11.2 2.6v2.6h2.6" />
+                  <path d="M4.8 13.4V10.8H2.2" />
+                </svg>
+              </Box>
+            )}
+            {toast.text}
+          </Box>
+        )}
       </Box>
     </>
   );
