@@ -1,7 +1,7 @@
 import type { activeDinoProfile, dinoAddedEvent, dinoRemovalEvent, maintenanceZone } from "../types/event_types";
 
 export async function getActivity() {
-    const response = await fetch(`${import.meta.env.VITE_BASE_NUDLS_API_URL}`);
+    const response = await fetch("https://dinoparks.herokuapp.com/nudls/feed");
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -95,7 +95,7 @@ function buildDinoProfiles(activityLogs: any[], activeDinosList: dinoAddedEvent[
 }
 
 function isGridSquare(location: string) {
-    return /^[A-Z]([0-9]|1[0-5])$/.test(location);
+    return /^[A-Z]([0-9]|1[0-6])$/.test(location);
 }
 
 function buildMaintenanceSchedule(activityLogs: any[], activeDinoProfiles: activeDinoProfile[]){
@@ -110,7 +110,7 @@ function buildMaintenanceSchedule(activityLogs: any[], activeDinoProfiles: activ
     const columns = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const maintenanceSchedule: maintenanceZone[] = [];
     for (const column of columns) {
-        for (let row = 0; row <= 15; row++) {
+        for (let row = 0; row <= 16; row++) {
             maintenanceSchedule.push({
                 park_id: parkId,
                 location: `${column}${row}`,
